@@ -1,0 +1,78 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model DeleteVote {
+  user_id Int
+  file_id Int
+  users   Users @relation(fields: [user_id], references: [id], onUpdate: Restrict, map: "delete_vote_ibfk_1")
+  files   Files @relation(fields: [file_id], references: [id], onUpdate: Restrict, map: "delete_vote_ibfk_2")
+
+  @@id([user_id, file_id])
+  @@index([file_id], map: "file_id")
+  @@map("delete_vote")
+}
+
+model Files {
+  id          Int           @id @default(autoincrement())
+  user_id     Int
+  group_id    Int
+  bucket_uri  String        @default("") @db.VarChar(255)
+  bucket_path String        @default("") @db.VarChar(255)
+  created_at  DateTime      @default(now()) @db.Timestamp(0)
+  updated_at  DateTime?     @default(now()) @db.Timestamp(0)
+  delete_vote DeleteVote[]
+  groups      Groups        @relation(fields: [group_id], references: [id], onUpdate: Restrict, map: "files_ibfk_1")
+  users       Users         @relation(fields: [user_id], references: [id], onUpdate: Restrict, map: "files_ibfk_2")
+
+  @@index([group_id], map: "group_id")
+  @@index([user_id], map: "user_id")
+  @@map("files")
+}
+
+model Groups {
+  id                Int                 @id @default(autoincrement())
+  password          String              @db.VarChar(255)
+  owner             Int
+  description       String?             @default("") @db.Text
+  max_user          Int                 @default(1)
+  created_at        DateTime            @default(now()) @db.Timestamp(0)
+  updated_at        DateTime?           @default(now()) @db.Timestamp(0)
+  files             Files[]
+  users             Users               @relation(fields: [owner], references: [id], onUpdate: Restrict, map: "groups_ibfk_1")
+  junc_users_groups junc_users_groups[]
+
+  @@index([owner], map: "owner")
+  @@map("groups")
+}
+
+model junc_users_groups {
+  user_id  Int
+  group_id Int
+  users    Users  @relation(fields: [user_id], references: [id], onUpdate: Restrict, map: "junc_users_groups_ibfk_1")
+  groups   Groups @relation(fields: [group_id], references: [id], onUpdate: Restrict, map: "junc_users_groups_ibfk_2")
+
+  @@id([user_id, group_id])
+  @@index([group_id], map: "group_id")
+}
+
+model Users {
+  id                Int                 @id @default(autoincrement())
+  name              String              @default("") @db.VarChar(50)
+  password          String              @db.VarChar(255)
+  description       String?             @default("") @db.Text
+  is_admin          Boolean             @default(false)
+  created_at        DateTime            @default(now()) @db.Timestamp(0)
+  updated_at        DateTime?           @default(now()) @db.Timestamp(0)
+  deleted_at        DateTime?           @db.Timestamp(0)
+  delete_vote       DeleteVote[]
+  files             Files[]
+  groups            Groups[]
+  junc_users_groups junc_users_groups[]
+  @@map("users")
+}
