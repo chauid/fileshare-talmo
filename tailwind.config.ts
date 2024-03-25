@@ -12,6 +12,10 @@ const config: Config = {
       lg: '1024px',
       xl: '1280px',
       xxl: '1440px',
+      x3l: '1600px',
+      x4l: '1920px',
+      x5l: '2160px',
+      x6l: '2560px',
     },
     extend: {
       backgroundImage: {
