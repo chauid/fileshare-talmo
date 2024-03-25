@@ -1,3 +1,65 @@
 {
-  "extends": "next/core-web-vitals"
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["@typescript-eslint", "import"],
+  "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended", "airbnb-base", "next/core-web-vitals"],
+  "rules": {
+    "camelcase": "off",
+    "no-console": ["error", { "allow": ["assert"] }],
+    "no-unused-vars": "off",
+    "no-alert": "off",
+    "linebreak-style": "off",
+    "no-underscore-dangle": "off",
+    "dot-notation": "off",
+    "max-len": ["warn", { "code": 150, "ignoreComments": true }],
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/no-unused-vars": ["warn"],
+    "@typescript-eslint/indent": ["warn", 2],
+    "object-curly-newline": 0,
+    "react/no-unknown-property": [2, { "ignore": ["jsx"] }],
+    "no-use-before-define": [
+      "error",
+      {
+        "functions": true,
+        "classes": true,
+        "variables": false,
+        "allowNamedExports": true
+      }
+    ],
+    "import/no-unresolved": "error",
+    "import/extensions": [
+      "error",
+      "ignorePackages",
+      {
+        "js": "never",
+        "jsx": "never",
+        "ts": "never",
+        "tsx": "never"
+      }
+    ],
+    "import/order": [
+      "warn",
+      {
+        "groups": ["builtin", "external", ["parent", "sibling"], "index", "object", "type"],
+        "alphabetize": {
+          "order": "asc",
+          "caseInsensitive": true
+        },
+        "newlines-between": "always"
+      }
+    ]
+  },
+  "settings": {
+    "import/parsers": {
+      "@typescript-eslint/parser": [".ts", ".tsx"]
+    },
+    "import/resolver": {
+      "typescript": {
+        "alwaysTryTypes": true
+      }
+    }
+  },
+  "globals": {
+    "JSX": true
+  }
 }

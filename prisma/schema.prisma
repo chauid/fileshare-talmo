@@ -19,16 +19,16 @@ model DeleteVote {
 }
 
 model Files {
-  id          Int           @id @default(autoincrement())
+  id          Int          @id @default(autoincrement())
   user_id     Int
   group_id    Int
-  bucket_uri  String        @default("") @db.VarChar(255)
-  bucket_path String        @default("") @db.VarChar(255)
-  created_at  DateTime      @default(now()) @db.Timestamp(0)
-  updated_at  DateTime?     @default(now()) @db.Timestamp(0)
+  bucket_uri  String       @default("") @db.VarChar(255)
+  bucket_path String       @default("") @db.VarChar(255)
+  created_at  DateTime     @default(now()) @db.Timestamp(0)
+  updated_at  DateTime?    @default(now()) @db.Timestamp(0)
   delete_vote DeleteVote[]
-  groups      Groups        @relation(fields: [group_id], references: [id], onUpdate: Restrict, map: "files_ibfk_1")
-  users       Users         @relation(fields: [user_id], references: [id], onUpdate: Restrict, map: "files_ibfk_2")
+  groups      Groups       @relation(fields: [group_id], references: [id], onUpdate: Restrict, map: "files_ibfk_1")
+  users       Users        @relation(fields: [user_id], references: [id], onUpdate: Restrict, map: "files_ibfk_2")
 
   @@index([group_id], map: "group_id")
   @@index([user_id], map: "user_id")
@@ -38,20 +38,20 @@ model Files {
 model Groups {
   id                Int                 @id @default(autoincrement())
   password          String              @db.VarChar(255)
-  owner             Int
+  owner_id          Int
   description       String?             @default("") @db.Text
   max_user          Int                 @default(1)
   created_at        DateTime            @default(now()) @db.Timestamp(0)
   updated_at        DateTime?           @default(now()) @db.Timestamp(0)
   files             Files[]
-  users             Users               @relation(fields: [owner], references: [id], onUpdate: Restrict, map: "groups_ibfk_1")
-  junc_users_groups junc_users_groups[]
+  users             Users               @relation(fields: [owner_id], references: [id], onUpdate: Restrict, map: "groups_ibfk_1")
+  junc_users_groups JuncUsersGroups[]
 
-  @@index([owner], map: "owner")
+  @@index([owner_id], map: "owner_id")
   @@map("groups")
 }
 
-model junc_users_groups {
+model JuncUsersGroups {
   user_id  Int
   group_id Int
   users    Users  @relation(fields: [user_id], references: [id], onUpdate: Restrict, map: "junc_users_groups_ibfk_1")
@@ -59,6 +59,7 @@ model junc_users_groups {
 
   @@id([user_id, group_id])
   @@index([group_id], map: "group_id")
+  @@map("junc_users_groups")
 }
 
 model Users {
@@ -73,6 +74,19 @@ model Users {
   delete_vote       DeleteVote[]
   files             Files[]
   groups            Groups[]
-  junc_users_groups junc_users_groups[]
+  junc_users_groups JuncUsersGroups[]
+  login_log         LoginLog[]
+
   @@map("users")
+}
+
+model LoginLog {
+  id         Int      @id @default(autoincrement())
+  user_id    Int
+  agent      String?  @db.VarChar(255)
+  created_at DateTime @default(now()) @db.Timestamp(0)
+  users      Users    @relation(fields: [user_id], references: [id], onUpdate: Restrict, map: "login_log_ibfk_1")
+
+  @@index([user_id], map: "user_id")
+  @@map("login_log")
 }
