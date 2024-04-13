@@ -8,14 +8,16 @@ import { HiCog, HiOutlineLogin, HiOutlineLogout, HiUserAdd } from 'react-icons/h
 import Skeleton from 'react-loading-skeleton';
 
 import AsideButton from '@components/buttons/aside-button';
+import { IUserInfo } from '@lib/client/hooks/use-layout';
 
 interface IHeaderProps {
   asideToggle: boolean;
   screenSize: number;
-  asideToggleHandle: (asideState: boolean) => void;
+  setAsideToggle: (asideState: boolean) => void;
+  userInfo: IUserInfo;
 }
 
-export default function HeaderLayout({ asideToggle, screenSize, asideToggleHandle }: IHeaderProps) {
+export default function HeaderLayout({ asideToggle, screenSize, setAsideToggle, userInfo }: IHeaderProps) {
   return (
     <>
       {screenSize !== 0 ? (
@@ -28,11 +30,17 @@ export default function HeaderLayout({ asideToggle, screenSize, asideToggleHandl
           <div className="m-1 flex items-center justify-center">
             {screenSize < 1024 && (
               <div className="m-1 flex items-center justify-center">
-                <AsideButton toggle={asideToggle} toggleHandle={asideToggleHandle} />
+                <AsideButton toggle={asideToggle} toggleHandle={setAsideToggle} />
               </div>
             )}
-            <Link href="/" className="ml-3 flex items-center">
-              <Image src={'/fileshare128.png'} width={40} height={40} alt="FileShare Logo" className=" inline-block" />
+            <Link
+              href="/"
+              className="ml-3 flex items-center"
+              onClick={() => {
+                setAsideToggle(false);
+              }}
+            >
+              <Image src={'/fileshare128.png'} width={40} height={40} alt="FileShare Logo" className="inline-block" />
               <strong className="ml-3 text-2xl">Talmo</strong>
               {screenSize >= 1024 && (
                 <div>
@@ -45,17 +53,64 @@ export default function HeaderLayout({ asideToggle, screenSize, asideToggleHandl
           {screenSize >= 640 && <div className="mx-1" aria-label="blank" />}
           {screenSize >= 1024 && <div className="mx-1" aria-label="blank" />}
           <div className="mx-2 flex items-center justify-center">
-            <Dropdown label={<Avatar alt="User Profile" img="/images/people/profile-picture-5.jpg" rounded />} arrowIcon={false} inline>
-              <Dropdown.Header>
-                <span className="block text-sm">사용자 닉네임</span>
-              </Dropdown.Header>
-              <Dropdown.Item icon={HiCog}>프로필 및 설정</Dropdown.Item>
-              <Dropdown.Divider />
-              <Dropdown.Item icon={HiOutlineLogin}>로그인</Dropdown.Item>
-              <Dropdown.Item icon={HiOutlineLogout}>로그아웃</Dropdown.Item>
-              <Dropdown.Item icon={HiUserAdd}>회원가입</Dropdown.Item>
+            <Dropdown label={<Avatar alt="profile_image" img="/" rounded />} arrowIcon={false} inline>
+              {userInfo.id && (
+                <Dropdown.Header>
+                  <span className="block text-sm">{userInfo.id}</span>
+                  <span className="block text-sm text-gray-400">{userInfo.email}</span>
+                </Dropdown.Header>
+              )}
+              {userInfo.id && (
+                <Dropdown.Item
+                  as={Link}
+                  href="/settings/profile"
+                  icon={HiCog}
+                  onClick={() => {
+                    setAsideToggle(false);
+                  }}
+                >
+                  프로필 및 설정
+                </Dropdown.Item>
+              )}
+              {userInfo.id && <Dropdown.Divider />}
+              {userInfo.id ? (
+                <Dropdown.Item
+                  as={Link}
+                  href="/logout"
+                  icon={HiOutlineLogout}
+                  onClick={() => {
+                    setAsideToggle(false);
+                  }}
+                >
+                  로그아웃
+                </Dropdown.Item>
+              ) : (
+                <Dropdown.Item
+                  as={Link}
+                  href="/login"
+                  icon={HiOutlineLogin}
+                  onClick={() => {
+                    setAsideToggle(false);
+                  }}
+                >
+                  로그인
+                </Dropdown.Item>
+              )}
+              {!userInfo.id && (
+                <Dropdown.Item
+                  as={Link}
+                  href="/signup"
+                  icon={HiUserAdd}
+                  onClick={() => {
+                    setAsideToggle(false);
+                  }}
+                >
+                  회원가입
+                </Dropdown.Item>
+              )}
             </Dropdown>
           </div>
+          {/* <button onClick={() => { console.table(userInfo); }}>DD</button> */}
         </header>
       ) : (
         <header

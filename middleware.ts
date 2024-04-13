@@ -8,52 +8,44 @@ export async function middleware(request: NextRequest) {
   const session = await getAuthSession();
 
   if (agent.isBot) {
-    return NextResponse.json(
-      { message: 'Bot can\'t access.' },
-      { status: 403 },
-    );
+    return NextResponse.json({ message: "Bot can't access." }, { status: 403 });
   }
 
-  // Allow Auth Logic
-  if (url.pathname.startsWith('/api/auth')) {
+  // Allow Auth, SignUp API
+  if (url.pathname.startsWith('/api/auth') || url.pathname.startsWith('/api/signup')) {
     return NextResponse.next();
-  }
-
-  // No Admin - API
-  if (url.pathname.startsWith('/api/admins')) {
-    if (!session.isAdmin) {
-      return NextResponse.json(
-        { message: 'Forbidden.' },
-        { status: 403 },
-      );
-    }
   }
 
   // No Session - API
   if (url.pathname.startsWith('/api')) {
-    if (session.name === undefined || session.name === null) {
-      return NextResponse.json(
-        { message: 'Unauthorized.' },
-        { status: 401 },
-      );
+    if (!session.id) {
+      return NextResponse.json({ message: 'Unauthorized.' }, { status: 401 });
     }
   }
 
-  // No Session - Exclude API
-  if (session.name === undefined || session.name === null) {
-    return NextResponse.redirect(new URL('/login', request.url));
+  // No Session - Page
+  if (url.pathname.startsWith('/home') || url.pathname.startsWith('/settings')) {
+    if (!session.id) {
+      return NextResponse.redirect(new URL('/noauth', request.url));
+    }
   }
 
-  // No Admin - Page
+  // No Admin Session - API
+  if (url.pathname.startsWith('/api/admins')) {
+    if (!session.isAdmin) {
+      return NextResponse.json({ message: 'Forbidden.' }, { status: 403 });
+    }
+  }
+
+  // No Admin Session - Page
   if (url.pathname.startsWith('/admins')) {
     if (!session.isAdmin) {
       return NextResponse.redirect(new URL('/login', request.url));
     }
   }
-
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/admins/:path*', '/api/:path*'],
+  matcher: ['/home/:path*', '/settings/:path*', '/admins/:path*', '/api/:path*'],
 };

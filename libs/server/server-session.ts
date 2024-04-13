@@ -4,7 +4,7 @@ import { getIronSession } from 'iron-session';
 import { cookies } from 'next/headers';
 
 interface ISESSION_AUTH {
-  name: string;
+  id: string;
   isAdmin: boolean;
 }
 
@@ -20,12 +20,12 @@ interface ISESSION_DATA_OPTION {
 
 const AUTH_OPTION = {
   cookieName: 'user',
-  ttl: 86400, // 1 Days
+  ttl: 86400 * 2, // 2 Days
   password: process.env.SESSION_PASSWORD || '',
 };
 
 const DATA_OPTION = {
-  ttl: 360, // 10 Minute
+  ttl: 86400 * 2, // 2 Days
   password: process.env.SESSION_PASSWORD || '',
 };
 
@@ -34,13 +34,8 @@ export async function getAuthSession() {
   return getIronSession<ISESSION_AUTH>(cookies(), AUTH_OPTION);
 }
 
-export async function getAuthName() {
-  const session = await getIronSession<ISESSION_AUTH>(cookies(), AUTH_OPTION);
-  return session.name;
-}
-
 /* Session Data */
-export async function getSessionMsg(cookieName: string) {
+export async function getSessionData(cookieName: string) {
   const session = await getIronSession<ISESSION_DATA>(cookies(), { password: process.env.SESSION_PASSWORD || '', cookieName });
   return session.message;
 }
@@ -54,4 +49,9 @@ export async function setSessionData({ cookieName, message, ttl }: ISESSION_DATA
   const session = await getIronSession<ISESSION_DATA>(cookies(), dataOption);
   session.message = message;
   await session.save();
+}
+
+export async function destorySessionData(cookieName:string) {
+  const session = await getIronSession(cookies(), { cookieName, password: process.env.SESSION_PASSWORD || '' });
+  session.destroy();
 }
