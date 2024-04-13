@@ -13,8 +13,9 @@
     "dot-notation": "off",
     "max-len": ["warn", { "code": 150, "ignoreComments": true }],
     "@typescript-eslint/no-explicit-any": "off",
-    "@typescript-eslint/no-unused-vars": ["warn"],
-    "@typescript-eslint/indent": ["warn", 2],
+    "@typescript-eslint/no-unused-vars": "warn",
+    "indent": ["warn", 2],
+    "no-plusplus": "off",
     "object-curly-newline": 0,
     "react/no-unknown-property": [2, { "ignore": ["jsx"] }],
     "no-use-before-define": [

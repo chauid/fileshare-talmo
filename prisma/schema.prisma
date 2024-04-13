@@ -8,10 +8,10 @@ datasource db {
 }
 
 model DeleteVote {
-  user_id Int
+  user_id String @db.VarChar(50)
   file_id Int
-  users   Users @relation(fields: [user_id], references: [id], onUpdate: Restrict, map: "delete_vote_ibfk_1")
-  files   Files @relation(fields: [file_id], references: [id], onUpdate: Restrict, map: "delete_vote_ibfk_2")
+  users   Users  @relation(fields: [user_id], references: [id], onUpdate: Restrict, map: "delete_vote_ibfk_1")
+  files   Files  @relation(fields: [file_id], references: [id], onUpdate: Restrict, map: "delete_vote_ibfk_2")
 
   @@id([user_id, file_id])
   @@index([file_id], map: "file_id")
@@ -20,9 +20,9 @@ model DeleteVote {
 
 model Files {
   id          Int          @id @default(autoincrement())
-  user_id     Int
+  user_id     String       @db.VarChar(50)
   group_id    Int
-  bucket_uri  String       @default("") @db.VarChar(255)
+  bucket_uri  String       @unique(map: "bucket_uri") @default("") @db.VarChar(255)
   bucket_path String       @default("") @db.VarChar(255)
   created_at  DateTime     @default(now()) @db.Timestamp(0)
   updated_at  DateTime?    @default(now()) @db.Timestamp(0)
@@ -36,23 +36,23 @@ model Files {
 }
 
 model Groups {
-  id                Int                 @id @default(autoincrement())
-  password          String              @db.VarChar(255)
-  owner_id          Int
-  description       String?             @default("") @db.Text
-  max_user          Int                 @default(1)
-  created_at        DateTime            @default(now()) @db.Timestamp(0)
-  updated_at        DateTime?           @default(now()) @db.Timestamp(0)
+  id                Int               @id @default(autoincrement())
+  password          String            @db.VarChar(255)
+  user_id           String            @db.VarChar(50)
+  description       String?           @default("") @db.Text
+  max_user          Int               @default(1)
+  created_at        DateTime          @default(now()) @db.Timestamp(0)
+  updated_at        DateTime?         @default(now()) @db.Timestamp(0)
   files             Files[]
-  users             Users               @relation(fields: [owner_id], references: [id], onUpdate: Restrict, map: "groups_ibfk_1")
+  users             Users             @relation(fields: [user_id], references: [id], onUpdate: Restrict, map: "groups_ibfk_1")
   junc_users_groups JuncUsersGroups[]
 
-  @@index([owner_id], map: "owner_id")
+  @@index([user_id], map: "user_id")
   @@map("groups")
 }
 
 model JuncUsersGroups {
-  user_id  Int
+  user_id  String @db.VarChar(50)
   group_id Int
   users    Users  @relation(fields: [user_id], references: [id], onUpdate: Restrict, map: "junc_users_groups_ibfk_1")
   groups   Groups @relation(fields: [group_id], references: [id], onUpdate: Restrict, map: "junc_users_groups_ibfk_2")
@@ -63,14 +63,18 @@ model JuncUsersGroups {
 }
 
 model Users {
-  id                Int                 @id @default(autoincrement())
-  name              String              @default("") @db.VarChar(50)
-  password          String              @db.VarChar(255)
-  description       String?             @default("") @db.Text
-  is_admin          Boolean             @default(false)
-  created_at        DateTime            @default(now()) @db.Timestamp(0)
-  updated_at        DateTime?           @default(now()) @db.Timestamp(0)
-  deleted_at        DateTime?           @db.Timestamp(0)
+  id                String            @id @db.VarChar(50)
+  email             String?           @default("") @db.VarChar(70)
+  name              String            @default("") @db.VarChar(50)
+  password          String            @db.VarChar(255)
+  phone             String            @db.Char(13)
+  birth             DateTime          @db.Date
+  profile_image     String            @default("") @db.VarChar(255)
+  description       String?           @default("") @db.Text
+  is_admin          Boolean           @default(false)
+  created_at        DateTime          @default(now()) @db.Timestamp(0)
+  updated_at        DateTime?         @default(now()) @db.Timestamp(0)
+  deleted_at        DateTime?         @db.Timestamp(0)
   delete_vote       DeleteVote[]
   files             Files[]
   groups            Groups[]
@@ -82,7 +86,7 @@ model Users {
 
 model LoginLog {
   id         Int      @id @default(autoincrement())
-  user_id    Int
+  user_id    String   @db.VarChar(50)
   agent      String?  @db.VarChar(255)
   created_at DateTime @default(now()) @db.Timestamp(0)
   users      Users    @relation(fields: [user_id], references: [id], onUpdate: Restrict, map: "login_log_ibfk_1")
