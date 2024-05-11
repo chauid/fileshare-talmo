@@ -1,15 +1,13 @@
+import { SWRProvider } from '@app/swr-provider';
+import MainLayout from '@components/layouts/main-layout';
 import { ThemeModeScript } from 'flowbite-react';
 import { Gothic_A1 } from 'next/font/google';
 import React from 'react';
-
-import { SWRProvider } from './swr-provider';
 
 import type { Metadata } from 'next';
 
 import 'react-loading-skeleton/dist/skeleton.css';
 import './globals.css';
-
-import MainLayout from '@components/layouts/main-layout';
 
 const gothic_a1 = Gothic_A1({
   subsets: ['latin'],

@@ -1,14 +1,12 @@
 'use client';
 
+import { TReturnSignUpPOST, TReturnSignUpPUT } from '@app/api/signup/route';
+import useMutation from '@lib/client/use-mutation';
+import { IPOSTSignUpSchema } from '@lib/schemas/sign-up-schema';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { FieldErrors, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
-
-import { TReturnSignUpGET, TReturnSignUpPOST } from '@app/api/signup/route';
-import useRequest from '@lib/client/use-request';
-import { ISignUpSchema } from '@lib/schemas/sign-up-schema';
-import { ObjectToFormData } from '@lib/utils';
 
 export type FormValidateType = 'available' | 'error' | 'writing';
 
@@ -17,13 +15,13 @@ export default function useSignUp() {
   const [checkId, setCheckId] = useState<FormValidateType>('writing');
 
   const apiUri = '/api/signup';
-  const signUpForm = useForm<ISignUpSchema>();
-  const { request: postRequest, clear: postClear, data: postData, isLoading: postIsLoading } = useRequest<TReturnSignUpPOST>(apiUri);
-  const { request: getRequest, clear: getClear, data: getData, isLoading: getIsLoading } = useRequest<TReturnSignUpGET>(apiUri);
+  const signUpForm = useForm<IPOSTSignUpSchema>();
+  const { request: postRequest, clear: postClear, data: postData, isLoading: postIsLoading } = useMutation<TReturnSignUpPOST>(apiUri);
+  const { request: putRequest, clear: putClear, data: putData, isLoading: putIsLoading } = useMutation<TReturnSignUpPUT>(apiUri);
 
   useEffect(() => {
     if (postData) {
-      if (postData.success === true) {
+      if (postData.success) {
         toast.success('회원가입이 완료되었습니다.');
         signUpForm.reset();
         router.replace('/');
@@ -31,25 +29,25 @@ export default function useSignUp() {
         toast.error(postData.message);
       }
     }
-    if (getData) {
-      if (getData.check === true) {
+    if (putData) {
+      if (putData.success) {
         setCheckId('available');
       } else {
         setCheckId('error');
       }
     }
-  }, [signUpForm, postData, getData, router]);
+  }, [signUpForm, postData, putData, router]);
 
   async function checkDuplicates() {
     const userId = signUpForm.getValues('id');
     if (userId) {
-      getClear();
+      putClear();
       postClear();
-      getRequest(new FormData(), 'GET', `${apiUri}?id=${userId}`);
+      putRequest({ id: userId }, 'PUT');
     }
   }
 
-  async function onValid(form: ISignUpSchema) {
+  async function onValid(form: IPOSTSignUpSchema) {
     if (signUpForm.getValues('birth') === undefined) {
       toast.error('생년월일을 입력해주세요.');
       return;
@@ -62,13 +60,11 @@ export default function useSignUp() {
       return;
     }
 
-    const reqForm = ObjectToFormData(form);
-
     postClear();
-    postRequest(reqForm, 'POST');
+    postRequest(form, 'POST');
   }
 
-  async function onInvlalid(errors: FieldErrors<ISignUpSchema>) {
+  async function onInvlalid(errors: FieldErrors<IPOSTSignUpSchema>) {
     const [error] = Object.values(errors);
     if (error && error.message) {
       toast.error(error.message);
@@ -77,10 +73,9 @@ export default function useSignUp() {
 
   return {
     signUpForm,
-    data: postData,
     checkId,
     setCheckId,
-    checkIdLoading: getIsLoading,
+    checkIdLoading: putIsLoading,
     isLoading: postIsLoading,
     checkDuplicates,
     register: signUpForm.register,

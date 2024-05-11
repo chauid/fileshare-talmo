@@ -1,5 +1,3 @@
-'use server';
-
 import * as bcrypt from 'bcrypt';
 import { sha256 } from 'js-sha256';
 

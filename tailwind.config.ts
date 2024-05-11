@@ -1,4 +1,3 @@
-/* eslint-disable global-require */
 import type { Config } from 'tailwindcss';
 
 const config: Config = {

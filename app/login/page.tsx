@@ -1,9 +1,8 @@
 'use client';
 
+import useAuth from '@lib/client/hooks/use-auth';
 import { Button, Checkbox, Label, TextInput } from 'flowbite-react';
 import { HiOutlineLockClosed, HiUser } from 'react-icons/hi';
-
-import useAuth from '@lib/client/hooks/use-auth';
 
 export default function Login() {
   const { isLoading, register, handleSubmit } = useAuth();
@@ -16,9 +15,7 @@ export default function Login() {
           type="text"
           icon={HiUser}
           placeholder="아이디"
-          {...register('id', {
-            required: { value: true, message: '아이디를 입력해주세요.' },
-          })}
+          {...register('id', { required: { value: true, message: '아이디를 입력해주세요.' } })}
         />
         <TextInput
           id="user_password"

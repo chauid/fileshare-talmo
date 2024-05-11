@@ -1,11 +1,11 @@
 import { Users } from '@prisma/client';
 import { JSONSchemaType } from 'ajv';
 
-export interface ISignUpSchema extends Pick<Users, 'id'| 'email' | 'name' | 'password' | 'phone'> {
+export interface IPOSTSignUpSchema extends Pick<Users, 'id' | 'email' | 'name' | 'password' | 'phone'> {
   birth: string; // Date
 }
 
-export const SignUpSchema: JSONSchemaType<ISignUpSchema> = {
+export const POSTSignUpSchema: JSONSchemaType<IPOSTSignUpSchema> = {
   type: 'object',
   properties: {
     id: { type: 'string' },
@@ -16,5 +16,16 @@ export const SignUpSchema: JSONSchemaType<ISignUpSchema> = {
     birth: { type: 'string' },
   },
   required: ['id', 'email', 'name', 'password', 'phone', 'birth'],
+  additionalProperties: false,
+};
+
+export interface IPUTSignUpSchema {
+  id: string;
+}
+
+export const PUTSignUpSchema: JSONSchemaType<IPUTSignUpSchema> = {
+  type: 'object',
+  properties: { id: { type: 'string' } },
+  required: ['id'],
   additionalProperties: false,
 };

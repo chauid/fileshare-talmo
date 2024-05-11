@@ -1,10 +1,9 @@
 'use client';
 
+import useSignUp, { FormValidateType } from '@lib/client/hooks/use-sign-up';
 import { Button, Datepicker, Label, TextInput } from 'flowbite-react';
 import React, { useState } from 'react';
 import { HiEye, HiEyeOff, HiOutlineDeviceMobile, HiOutlineLockClosed, HiOutlineMail, HiOutlineUser, HiUser } from 'react-icons/hi';
-
-import useSignUp, { FormValidateType } from '@lib/client/hooks/use-sign-up';
 
 export default function Login() {
   const { checkId, setCheckId, checkIdLoading, isLoading, checkDuplicates, register, setValue, handleSubmit } = useSignUp();

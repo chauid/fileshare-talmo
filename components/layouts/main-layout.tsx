@@ -1,18 +1,15 @@
 'use client';
 
-import clsx from 'clsx';
-import React, { useContext, useEffect, useState } from 'react';
-import { Toaster } from 'react-hot-toast';
-
 import AsideLayout from '@components/layouts/aside';
 import ContentLayout from '@components/layouts/content';
 import FooterLayout from '@components/layouts/footer';
 import HeaderLayout from '@components/layouts/header';
-import UserAuthContext from '@lib/client/contexts/user-context';
 import useLayout from '@lib/client/hooks/use-layout';
+import clsx from 'clsx';
+import React, { useEffect, useState } from 'react';
+import { Toaster } from 'react-hot-toast';
 
 export default function MainLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  const temp = useContext(UserAuthContext);
   const { userInfo } = useLayout();
 
   const [asideActive, setAsideActive] = useState(false);
@@ -36,7 +33,7 @@ export default function MainLayout({ children }: Readonly<{ children: React.Reac
         SetScreenSize(window.innerWidth);
       });
     };
-  }, [asideActive, temp]);
+  }, [asideActive]);
 
   return (
     <>

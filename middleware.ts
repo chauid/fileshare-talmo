@@ -1,6 +1,5 @@
-import { NextRequest, NextResponse, userAgent } from 'next/server';
-
 import { getAuthSession } from '@lib/server/server-session';
+import { NextRequest, NextResponse, userAgent } from 'next/server';
 
 export async function middleware(request: NextRequest) {
   const url = request.nextUrl;
@@ -31,14 +30,14 @@ export async function middleware(request: NextRequest) {
   }
 
   // No Admin Session - API
-  if (url.pathname.startsWith('/api/admins')) {
+  if (url.pathname.startsWith('/api/admin')) {
     if (!session.isAdmin) {
       return NextResponse.json({ message: 'Forbidden.' }, { status: 403 });
     }
   }
 
   // No Admin Session - Page
-  if (url.pathname.startsWith('/admins')) {
+  if (url.pathname.startsWith('/admin')) {
     if (!session.isAdmin) {
       return NextResponse.redirect(new URL('/login', request.url));
     }
@@ -46,6 +45,4 @@ export async function middleware(request: NextRequest) {
   return NextResponse.next();
 }
 
-export const config = {
-  matcher: ['/home/:path*', '/settings/:path*', '/admins/:path*', '/api/:path*'],
-};
+export const config = { matcher: ['/home/:path*', '/settings/:path*', '/admins/:path*', '/api/:path*'] };
