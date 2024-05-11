@@ -6,9 +6,9 @@ import { FieldErrors, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import { TReturnAuthPOST } from '@app/api/auth/route';
-import useRequest from '@lib/client/use-request';
+import { useRequest } from '@lib/client/use-request';
 import { IAuthSchema } from '@lib/schemas/auth-schema';
-import { ObjectToFormData } from '@lib/utils';
+import { objectToFormData } from '@lib/utils';
 
 export default function useAuth() {
   const userIdCookie = Cookies.get('user_id');
@@ -25,17 +25,13 @@ export default function useAuth() {
 
     if (data) {
       if (data.user) {
-        if (data.user.id_cookie) {
-          Cookies.set('user_id', data.user.id, { expires: 7, path: '', secure: true, sameSite: 'Strict' });
-        } else {
-          Cookies.remove('user_id');
-        }
         toast.success(data.message);
         window.location.href = '/home';
       } else {
         toast.error(data.message);
         const id_cookie = authForm.getValues('id_cookie');
         if (id_cookie) {
+          authForm.setValue('id', '');
           authForm.setValue('password', '');
         } else {
           authForm.reset();
@@ -49,7 +45,7 @@ export default function useAuth() {
       return;
     }
 
-    const reqForm = ObjectToFormData(form);
+    const reqForm = objectToFormData(form);
 
     clear();
     request(reqForm, 'POST');

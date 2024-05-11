@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react';
 
-import { TReturnAuthGET } from '@app/api/auth/route';
-import useRequest from '@lib/client/use-request';
+import { TReturnUserGET } from '@app/api/user/route';
+import { useGET } from '@lib/client/use-request';
 
 export interface IUserInfo {
   id?: string;
@@ -13,33 +13,36 @@ export interface IUserInfo {
 
 export default function useLayout() {
   const [userId, setUserId] = useState<string | undefined>();
-  const [userEmail, setUserEmail] = useState<string | undefined>();
+  const [userEmail, setUserEmail] = useState<string | undefined | null>();
   const [userName, setUserName] = useState<string | undefined>();
+  const [userImage, setUserImage] = useState<string | undefined>();
   const [loadOnce, setLoadOnce] = useState(true);
 
-  const apiUri = '/api/auth';
-  const { request, clear, data } = useRequest<TReturnAuthGET>(apiUri);
+  const apiUri = '/api/user';
+  const { request, clear, data } = useGET<TReturnUserGET>(apiUri);
 
   useEffect(() => {
     if (loadOnce) {
-      request(new FormData(), 'GET');
+      request();
       setLoadOnce(false);
     }
 
     if (data) {
-      if (data.user) {
-        setUserId(data.user.id);
-        setUserEmail(data.user.email);
-        setUserName(data.user.name);
+      if (data.userInfo) {
+        setUserId(data.userInfo.id);
+        setUserEmail(data.userInfo.email);
+        setUserName(data.userInfo.name);
+        setUserImage(data.userInfo.profile_image);
         clear();
       }
     }
 
     if (userId) {
       setTimeout(() => {
-        request(new FormData(), 'GET', '/api/auth?action=logout');
+        request(`${apiUri}?action=logout`);
         alert('세션이 만료되었습니다.');
-      }, 1000 * 7200); // 2 Hours
+        window.location.href = '/login';
+      }, 1000 * 3600 * 2); // 2 Hours
     }
   }, [clear, data, loadOnce, request, userId]);
 

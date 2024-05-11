@@ -1,4 +1,4 @@
-export function ObjectToFormData(objectForm: object): FormData {
+export function objectToFormData(objectForm: object): FormData {
   const resultForm = new FormData();
   const formKeys = Object.keys(objectForm);
   const formValues = Object.values(objectForm);
@@ -10,9 +10,13 @@ export function ObjectToFormData(objectForm: object): FormData {
   return resultForm;
 }
 
-export function JSToDBDateType(date: Date) {
-  const year = date.getFullYear();
-  const month = date.getMonth() + 1;
-  const day = date.getDate();
-  return `${year.toString()}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+export function dateToString(date: Date) {
+  const originDate = new Date(date);
+  const years = originDate.getFullYear();
+  const months = (`0${originDate.getMonth() + 1}`).slice(-2);
+  const days = (`0${originDate.getDate()}`).slice(-2);
+  const hours = (`0${originDate.getHours()}`).slice(-2);
+  const minutes = (`0${originDate.getMinutes()}`).slice(-2);
+  const seconds = (`0${originDate.getSeconds()}`).slice(-2);
+  return `${years}년 ${months}월 ${days}일 ${hours}:${minutes}:${seconds}`;
 }

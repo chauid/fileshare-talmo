@@ -8,7 +8,8 @@ interface FetchState<T> {
   error?: object;
 }
 
-type MethodType = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+type MethodType = 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+
 type ResponseType<T> = {
   request: (dataBody: FormData, method: MethodType, uri?: string) => void;
   clear: () => void;
@@ -17,33 +18,52 @@ type ResponseType<T> = {
   error?: object;
 };
 
-export default function useRequest<T = object>(key: string): ResponseType<T> {
+type ResponseGetType<T> = {
+  request: (uri?: string) => void;
+  clear: () => void;
+  data?: T;
+  isLoading: boolean;
+  error?: object;
+};
+
+export function useRequest<T = object>(key: string): ResponseType<T> {
   const [state, setState] = useState<FetchState<T>>({ data: undefined, isLoading: false, error: undefined });
 
   async function request(dataBody: FormData, method: MethodType, uri: string = key) {
     setState((prev) => ({ ...prev, isLoading: true }));
-    if (method === 'GET') {
-      await fetch(uri, {
-        method,
-        mode: 'same-origin',
+    await fetch(uri, {
+      method,
+      mode: 'same-origin',
+      body: dataBody,
+    })
+      .then((res) => res.json())
+      .then((res) => {
+        setState((prev) => ({ ...prev, data: res, isLoading: false }));
       })
-        .then((res) => res.json())
-        .then((res) => {
-          setState((prev) => ({ ...prev, data: res, isLoading: false }));
-        })
-        .catch((error) => setState((prev) => ({ ...prev, error, loading: false })));
-    } else {
-      await fetch(uri, {
-        method,
-        mode: 'same-origin',
-        body: dataBody,
+      .catch((error) => setState((prev) => ({ ...prev, error, loading: false })));
+  }
+
+  function clear() {
+    setState({ data: undefined, isLoading: false, error: undefined });
+  }
+
+  return { request, clear, ...state };
+}
+
+export function useGET<T = object>(key: string): ResponseGetType<T> {
+  const [state, setState] = useState<FetchState<T>>({ data: undefined, isLoading: false, error: undefined });
+
+  async function request(uri: string = key) {
+    setState((prev) => ({ ...prev, isLoading: true }));
+    await fetch(uri, {
+      method: 'GET',
+      mode: 'same-origin',
+    })
+      .then((res) => res.json())
+      .then((res) => {
+        setState((prev) => ({ ...prev, data: res, isLoading: false }));
       })
-        .then((res) => res.json())
-        .then((res) => {
-          setState((prev) => ({ ...prev, data: res, isLoading: false }));
-        })
-        .catch((error) => setState((prev) => ({ ...prev, error, loading: false })));
-    }
+      .catch((error) => setState((prev) => ({ ...prev, error, loading: false })));
   }
 
   function clear() {

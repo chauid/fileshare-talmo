@@ -6,9 +6,9 @@ import { FieldErrors, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import { TReturnSignUpGET, TReturnSignUpPOST } from '@app/api/signup/route';
-import useRequest from '@lib/client/use-request';
+import { useGET, useRequest } from '@lib/client/use-request';
 import { ISignUpSchema } from '@lib/schemas/sign-up-schema';
-import { ObjectToFormData } from '@lib/utils';
+import { objectToFormData } from '@lib/utils';
 
 export type FormValidateType = 'available' | 'error' | 'writing';
 
@@ -19,7 +19,7 @@ export default function useSignUp() {
   const apiUri = '/api/signup';
   const signUpForm = useForm<ISignUpSchema>();
   const { request: postRequest, clear: postClear, data: postData, isLoading: postIsLoading } = useRequest<TReturnSignUpPOST>(apiUri);
-  const { request: getRequest, clear: getClear, data: getData, isLoading: getIsLoading } = useRequest<TReturnSignUpGET>(apiUri);
+  const { request: getRequest, clear: getClear, data: getData, isLoading: getIsLoading } = useGET<TReturnSignUpGET>(apiUri);
 
   useEffect(() => {
     if (postData) {
@@ -45,7 +45,7 @@ export default function useSignUp() {
     if (userId) {
       getClear();
       postClear();
-      getRequest(new FormData(), 'GET', `${apiUri}?id=${userId}`);
+      getRequest(`${apiUri}?id=${userId}`);
     }
   }
 
@@ -62,7 +62,7 @@ export default function useSignUp() {
       return;
     }
 
-    const reqForm = ObjectToFormData(form);
+    const reqForm = objectToFormData(form);
 
     postClear();
     postRequest(reqForm, 'POST');
@@ -77,7 +77,6 @@ export default function useSignUp() {
 
   return {
     signUpForm,
-    data: postData,
     checkId,
     setCheckId,
     checkIdLoading: getIsLoading,

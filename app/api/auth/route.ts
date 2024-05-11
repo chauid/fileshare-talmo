@@ -1,33 +1,28 @@
 import Ajv from 'ajv';
-import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
+import { NextRequest, NextResponse, userAgent } from 'next/server';
 
 import { AuthSchema } from '@lib/schemas/auth-schema';
 import { comparePassword } from '@lib/server/encryption';
+import * as LoginLogModules from '@lib/server/modules/login-log';
 import * as UserModules from '@lib/server/modules/user';
 import { IResponseDefault } from '@lib/server/response';
-import { getAuthSession } from '@lib/server/server-session';
+import { getAuthSession, getEncryptedSession, ISESSION_AUTH } from '@lib/server/server-session';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const currentSession = await getAuthSession();
+  const session = await getAuthSession();
 
   if (searchParams.get('action') === 'logout') {
-    currentSession.destroy();
+    cookies().delete('user');
     return NextResponse.json({ message: 'Y' }, { status: 200 });
   }
 
-  if (!currentSession.id) {
-    return NextResponse.json({ message: 'N' }, { status: 200 });
+  if (session.id) {
+    return NextResponse.json({ message: 'Y' }, { status: 200 });
   }
 
-  try {
-    const user = await UserModules.findUserById(currentSession.id);
-    if (user) {
-      return NextResponse.json({ message: 'Y', user: { id: user.id, email: user.email, name: user.name } }, { status: 200 });
-    }
-  } catch (error) {
-    return NextResponse.json({ message: 'Internal Server Error.' }, { status: 500 });
-  }
+  return NextResponse.json({ message: 'N' }, { status: 200 });
 }
 
 export async function POST(request: NextRequest) {
@@ -43,24 +38,40 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const user = await UserModules.findUserById(formObject.id);
+    const user = await UserModules.readUserById(formObject.id);
     if (!user) {
       return NextResponse.json({ message: '아이디를 찾을 수 없습니다.' }, { status: 200 });
     }
 
     if (await comparePassword(formObject.password, user.password)) {
-      const auth = await getAuthSession();
-      auth.id = user.id;
-      if (user.is_admin) {
-        auth.isAdmin = true;
-      } else {
-        auth.isAdmin = false;
+      let agentlog = '';
+      const agent = userAgent(request);
+      agentlog += `${agent.browser.name} ${agent.browser.version}`;
+      agentlog += `/${agent.os.name} ${agent.os.version}`;
+      if (agent.device.model) {
+        agentlog += `/${agent.device.model} ${agent.device.type}`;
       }
-      await auth.save();
-      return NextResponse.json(
-        { message: '인증 성공.', user: { id: user.id, email: user.email, name: user.name, id_cookie: formObject.id_cookie } },
-        { status: 200 },
-      );
+      if (agent.cpu.architecture) {
+        agentlog += `/${agent.cpu.architecture}`;
+      }
+      LoginLogModules.createLog(user.id, agentlog);
+
+      const authData: ISESSION_AUTH = { id: '', isAdmin: false };
+      authData.id = user.id;
+      if (user.is_admin) {
+        authData.isAdmin = true;
+      } else {
+        authData.isAdmin = false;
+      }
+      const sessionValue = await getEncryptedSession(authData);
+      cookies().set('user', sessionValue, { sameSite: 'strict', httpOnly: true });
+
+      if (formObject.id_cookie) {
+        cookies().set('user_id', user.id, { sameSite: 'strict', maxAge: 3600 * 24 * 7 }); // 7 Days
+      } else {
+        cookies().delete('user_id');
+      }
+      return NextResponse.json({ message: '인증 성공.', user: { id: user.id } }, { status: 200 });
     }
     return NextResponse.json({ message: '로그인 정보가 일치하지 않습니다.' }, { status: 200 });
   } catch (error) {
@@ -68,10 +79,8 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export type TReturnAuthGET = IResponseDefault & {
-  user?: { id: string; email: string; name: string };
-};
+export type TReturnAuthGET = IResponseDefault;
 
 export type TReturnAuthPOST = IResponseDefault & {
-  user?: { id: string; email: string; name: string; id_cookie: boolean };
+  user?: { id: string };
 };

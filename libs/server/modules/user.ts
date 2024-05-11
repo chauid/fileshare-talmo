@@ -3,16 +3,33 @@ import { Prisma } from '@prisma/client';
 import { ISignUpSchema } from '@lib/schemas/sign-up-schema';
 import client from '@lib/server/prisma-client';
 
-export async function findUserById(id: string) {
-  const isExist = await client.users.findFirst({
+export async function readUserById(id: string) {
+  const user = await client.users.findFirst({
     where: { id },
-    select: { id: true, email: true, name: true, password: true, is_admin: true },
   });
-  return isExist;
+  return user;
 }
 
-export async function registerUser({ id, email, name, password, phone, birth }: ISignUpSchema) {
-  const regist = await client.users.create({
+export async function readUserByIdWithoutPrivate(id: string) {
+  const user = await client.users.findFirst({
+    where: { id },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      phone: true,
+      birth: true,
+      profile_image: true,
+      description: true,
+      is_admin: true,
+      created_at: true,
+    },
+  });
+  return user;
+}
+
+export async function createUser({ id, email, name, password, phone, birth }: ISignUpSchema) {
+  const create = await client.users.create({
     data: {
       id,
       email,
@@ -23,9 +40,10 @@ export async function registerUser({ id, email, name, password, phone, birth }: 
       is_admin: false,
     },
   });
-  return regist;
+  return create;
 }
 
 /** Return Type */
-export type TFindUserId = Prisma.PromiseReturnType<typeof findUserById>;
-export type TRegisterUser = Prisma.PromiseReturnType<typeof registerUser>;
+export type TReadUserById = Prisma.PromiseReturnType<typeof readUserById>;
+export type TReadUserByIdWithoutPrivate = Prisma.PromiseReturnType<typeof readUserByIdWithoutPrivate>;
+export type TCreateUser = Prisma.PromiseReturnType<typeof createUser>;

@@ -1,11 +1,80 @@
+import path from 'path';
+
+import { GetSignedUrlConfig, Storage } from '@google-cloud/storage';
+import { Prisma } from '@prisma/client';
+
+import client from '@lib/server/prisma-client';
+import { IResponseDefault } from '@lib/server/response';
 import { getAuthSession } from '@lib/server/server-session';
 
 /* eslint-disable import/prefer-default-export */
-export async function GET(request: Request) {
-  const session = await getAuthSession();
-  session.name = 'Alison';
-  session.isAdmin = false;
-  await session.save();
+export async function GET() {
+  const cwd = path.join(__dirname, '..');
+  const destFileName = path.join(cwd, 'download.png');
+  const fileName = 'generate1.png';
 
-  return Response.json({ status: 200, message: 'session test' });
+  const storage = new Storage({
+    projectId: process.env.GCS_PROJECT_ID,
+    credentials: { client_email: process.env.GCS_CLIENT_EMAIL, private_key: process.env.GCS_PRIVATE_KEY },
+  });
+
+  // const [buckets] = await storage.getBuckets();
+  // const bucket = storage.bucket(process.env.BUCKET_NAME || '');
+  // console.log('Buckets:');
+  // console.log(bucket.name);
+  // const [files] = await bucket.getFiles();
+
+  // console.log('Files:');
+  // files.forEach((file) => {
+  //   console.log(file.name);
+  // });
+
+  // async function downloadFile() {
+  //   const options = {
+  //     destination: destFileName,
+  //   };
+
+  //   // Downloads the file
+  //   await storage.bucket(process.env.BUCKET_NAME || '').file(fileName).download(options).catch((e) => { console.log(e); console.log('end'); });
+
+  //   console.log(
+  //     `gs://${bucket.name}/${fileName} downloaded to ${destFileName}.`,
+  //   );
+  // }
+
+  // downloadFile();
+
+  async function generateV4ReadSignedUrl() {
+    // These options will allow temporary read access to the file
+    const options: GetSignedUrlConfig = {
+      version: 'v2',
+      action: 'read',
+      expires: Date.now() + 15 * 60 * 1000, // 15 minutes
+    };
+
+    // Get a v4 signed URL for reading the file
+    const [url] = await storage
+      .bucket(process.env.GCS_BUCKET_NAME || '')
+      .file(fileName)
+      .getSignedUrl(options);
+
+    // console.log('Generated GET signed URL:');
+    // console.log(url);
+    // console.log('You can use this URL with any user agent, for example:');
+    // console.log(`curl '${url}'`);
+  }
+
+  // eslint-disable-next-line no-console
+  generateV4ReadSignedUrl().catch(console.error);
+
+  const session = await getAuthSession();
+
+  const apireturn = await client.users.findMany();
+
+  return Response.json({ message: 'session test', apireturn }, { status: 200 });
+}
+
+export interface IGETAPI extends IResponseDefault {
+  session: Prisma.PromiseReturnType<typeof getAuthSession>;
+  apireturn: Prisma.PromiseReturnType<typeof client.users.findMany>;
 }

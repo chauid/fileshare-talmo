@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
   const checkId = searchParams.get('id');
   try {
     if (checkId) {
-      const user = await UserModules.findUserById(checkId);
+      const user = await UserModules.readUserByIdWithoutPrivate(checkId);
       if (user) {
         return NextResponse.json({ message: '아이디가 중복되었습니다.', check: false }, { status: 200 });
       }
@@ -40,12 +40,12 @@ export async function POST(request: Request) {
   formObject.password = await getEncryptPassword(formObject.password);
 
   try {
-    const user = await UserModules.findUserById(formObject.id);
+    const user = await UserModules.readUserByIdWithoutPrivate(formObject.id);
     if (user) {
       return NextResponse.json({ message: '아이디가 중복되었습니다.', success: false }, { status: 400 });
     }
 
-    await UserModules.registerUser(formObject);
+    await UserModules.createUser(formObject);
     return NextResponse.json({ message: '회원가입이 완료되었습니다.', success: true }, { status: 200 });
   } catch (error) {
     return NextResponse.json({ message: 'Internal Server Error.', success: false }, { status: 500 });
