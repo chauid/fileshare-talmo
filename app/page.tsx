@@ -5,34 +5,11 @@ import Link from 'next/link';
 import React, { useState } from 'react';
 
 import InputDropZone from '@components/inputs/input-dropzone';
+import { fileOnChange } from '@lib/utils';
 
 export default function RootPage() {
   const [selectedImage, setSelectedImage] = useState('');
 
-  function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const inputFiles = event.target.files;
-    if (inputFiles && inputFiles[0]) {
-      const reader = new FileReader();
-      reader.onload = (e: ProgressEvent<FileReader>) => {
-        if (e.target) {
-          setSelectedImage(e.target.result as string);
-        }
-      };
-      reader.readAsDataURL(inputFiles[0]);
-    }
-  }
-  function handleFileOnDrop(event: React.DragEvent<HTMLLabelElement>) {
-    const inputFile = event.dataTransfer.files[0];
-    if (inputFile) {
-      const reader = new FileReader();
-      reader.onload = (e: ProgressEvent<FileReader>) => {
-        if (e.target) {
-          setSelectedImage(e.target.result as string);
-        }
-      };
-      reader.readAsDataURL(inputFile);
-    }
-  }
   return (
     <section>
       <div>Test</div>
@@ -44,7 +21,12 @@ export default function RootPage() {
         <input type="file" accept="image/*" onChange={handleFileChange} />
         {selectedImage && <Image src={selectedImage} alt="Uploaded Image" width={100} height={100} />}
       </div> */}
-      <InputDropZone src={selectedImage} alt='' size={100} accept='.jpeg, .jpg, .png, .webp' onChange={handleFileChange} onDrop={handleFileOnDrop} />
+      <InputDropZone
+        src={selectedImage}
+        alt=""
+        onChange={(event) => fileOnChange(event, setSelectedImage)}
+        className="h-96 w-96 rounded-3xl"
+      />
       {/* <div className="flex items-center justify-center w-full">
         <label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
           <div className="flex flex-col items-center justify-center pt-5 pb-6">

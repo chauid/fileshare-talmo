@@ -1,4 +1,5 @@
 export interface IResponseDefault {
-  message: string;
+  success: boolean;
+  message?: string;
   code?: string;
 }

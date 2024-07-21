@@ -18,32 +18,6 @@ export async function GET() {
     credentials: { client_email: process.env.GCS_CLIENT_EMAIL, private_key: process.env.GCS_PRIVATE_KEY },
   });
 
-  // const [buckets] = await storage.getBuckets();
-  // const bucket = storage.bucket(process.env.BUCKET_NAME || '');
-  // console.log('Buckets:');
-  // console.log(bucket.name);
-  // const [files] = await bucket.getFiles();
-
-  // console.log('Files:');
-  // files.forEach((file) => {
-  //   console.log(file.name);
-  // });
-
-  // async function downloadFile() {
-  //   const options = {
-  //     destination: destFileName,
-  //   };
-
-  //   // Downloads the file
-  //   await storage.bucket(process.env.BUCKET_NAME || '').file(fileName).download(options).catch((e) => { console.log(e); console.log('end'); });
-
-  //   console.log(
-  //     `gs://${bucket.name}/${fileName} downloaded to ${destFileName}.`,
-  //   );
-  // }
-
-  // downloadFile();
-
   async function generateV4ReadSignedUrl() {
     // These options will allow temporary read access to the file
     const options: GetSignedUrlConfig = {

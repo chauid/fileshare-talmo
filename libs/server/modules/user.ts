@@ -1,6 +1,6 @@
 import { Prisma } from '@prisma/client';
 
-import { ISignUpSchema } from '@lib/schemas/sign-up-schema';
+import { IPOSTSignUpSchema } from '@lib/schemas/sign-up-schema';
 import client from '@lib/server/prisma-client';
 
 export async function readUserById(id: string) {
@@ -28,7 +28,7 @@ export async function readUserByIdWithoutPrivate(id: string) {
   return user;
 }
 
-export async function createUser({ id, email, name, password, phone, birth }: ISignUpSchema) {
+export async function createUser({ id, email, name, password, phone, birth }: IPOSTSignUpSchema) {
   const create = await client.users.create({
     data: {
       id,

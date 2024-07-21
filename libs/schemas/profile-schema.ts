@@ -1,11 +1,12 @@
 import { Users } from '@prisma/client';
 import { JSONSchemaType } from 'ajv';
 
-export interface IProfileSchema extends Pick<Users, 'email' | 'name' | 'phone' | 'profile_image' | 'description'> {
+export interface IPUTProfileSchema extends Pick<Users, 'email' | 'name' | 'phone' | 'profile_image' | 'description'> {
   birth: string; // Date
+  file: object;
 }
 
-export const ProfileSchema: JSONSchemaType<IProfileSchema> = {
+export const PUTProfileSchema: JSONSchemaType<IPUTProfileSchema> = {
   type: 'object',
   properties: {
     email: { type: 'string' },
@@ -14,7 +15,8 @@ export const ProfileSchema: JSONSchemaType<IProfileSchema> = {
     birth: { type: 'string' },
     profile_image: { type: 'string', default: '' },
     description: { type: 'string', default: '' },
+    file: { type: 'object' },
   },
-  required: ['email', 'name', 'phone', 'birth'],
+  required: ['email', 'name', 'phone', 'birth', 'file'],
   additionalProperties: false,
 };

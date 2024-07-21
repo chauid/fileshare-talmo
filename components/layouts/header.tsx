@@ -4,7 +4,7 @@ import clsx from 'clsx';
 import { Dropdown } from 'flowbite-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { HiCog, HiOutlineLogin, HiOutlineLogout, HiUserAdd } from 'react-icons/hi';
+import { HiCog, HiOutlineLogout } from 'react-icons/hi';
 import Skeleton from 'react-loading-skeleton';
 
 import AsideButton from '@components/buttons/aside-button';
@@ -39,7 +39,7 @@ export default function HeaderLayout({ asideToggle, screenSize, setAsideToggle, 
               setAsideToggle(false);
             }}
           >
-            <Image src={'/fileshare128.png'} width={40} height={40} alt="FileShare Logo" className="inline-block" />
+            <Image src={'/fileshare128.png'} width={40} height={40} alt="FileShare Logo" priority className="inline-block" />
             <strong className="ml-3 text-2xl">Talmo</strong>
             {screenSize >= 1024 && (
               <div>
@@ -51,40 +51,34 @@ export default function HeaderLayout({ asideToggle, screenSize, setAsideToggle, 
         </div>
         {screenSize >= 640 && <div className="mx-1" aria-label="blank" />}
         {screenSize >= 1024 && <div className="mx-1" aria-label="blank" />}
-        <div className="mx-2 flex items-center justify-center">
-          <Dropdown
-            label={
-              <Image
-                src={'https://storage.googleapis.com/talmo-image-bucket/generate3.png'}
-                alt="Avatar"
-                width={50}
-                height={50}
-                className="aspect-square rounded-full"
-              />
-            }
-            arrowIcon={false}
-            inline
-          >
-            {userInfo.id && (
-              <Dropdown.Header>
-                <span className="block text-sm">{userInfo.id}</span>
-                <span className="block text-sm text-gray-400">{userInfo.email}</span>
-              </Dropdown.Header>
-            )}
-            {userInfo.id && (
-              <Dropdown.Item
-                as={Link}
-                href="/settings/profile"
-                icon={HiCog}
-                onClick={() => {
-                  setAsideToggle(false);
-                }}
-              >
-                프로필 및 설정
-              </Dropdown.Item>
-            )}
-            {userInfo.id && <Dropdown.Divider />}
-            {userInfo.id ? (
+        {userInfo.id ? (
+          <div className="mx-2 flex items-center justify-center">
+            <Dropdown
+              label={
+                <Image src={userInfo.profile_image || '/no-image.png'} alt="Avatar" width={50} height={50} className="aspect-square rounded-full" />
+              }
+              arrowIcon={false}
+              inline
+            >
+              {userInfo.id && (
+                <Dropdown.Header>
+                  <span className="block text-sm">{userInfo.id}</span>
+                  <span className="block text-sm text-gray-400">{userInfo.email}</span>
+                </Dropdown.Header>
+              )}
+              {userInfo.id && (
+                <Dropdown.Item
+                  as={Link}
+                  href="/settings/profile"
+                  icon={HiCog}
+                  onClick={() => {
+                    setAsideToggle(false);
+                  }}
+                >
+                  프로필 및 설정
+                </Dropdown.Item>
+              )}
+              {userInfo.id && <Dropdown.Divider />}
               <Dropdown.Item
                 as={Link}
                 href="/logout"
@@ -95,32 +89,14 @@ export default function HeaderLayout({ asideToggle, screenSize, setAsideToggle, 
               >
                 로그아웃
               </Dropdown.Item>
-            ) : (
-              <Dropdown.Item
-                as={Link}
-                href="/login"
-                icon={HiOutlineLogin}
-                onClick={() => {
-                  setAsideToggle(false);
-                }}
-              >
-                로그인
-              </Dropdown.Item>
-            )}
-            {!userInfo.id && (
-              <Dropdown.Item
-                as={Link}
-                href="/signup"
-                icon={HiUserAdd}
-                onClick={() => {
-                  setAsideToggle(false);
-                }}
-              >
-                회원가입
-              </Dropdown.Item>
-            )}
-          </Dropdown>
-        </div>
+            </Dropdown>
+          </div>
+        ) : (
+          <div className='flex gap-4'>
+            <Link href="/login">로그인</Link>
+            <Link href="/signup">회원가입</Link>
+          </div>
+        )}
       </header>
     );
   }

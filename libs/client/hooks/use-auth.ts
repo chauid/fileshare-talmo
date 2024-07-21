@@ -6,16 +6,15 @@ import { FieldErrors, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import { TReturnAuthPOST } from '@app/api/auth/route';
-import { useRequest } from '@lib/client/use-request';
+import useMutation from '@lib/client/use-mutation';
 import { IAuthSchema } from '@lib/schemas/auth-schema';
-import { objectToFormData } from '@lib/utils';
 
 export default function useAuth() {
   const userIdCookie = Cookies.get('user_id');
 
   const apiUri = '/api/auth';
   const authForm = useForm<IAuthSchema>();
-  const { request, clear, data, isLoading } = useRequest<TReturnAuthPOST>(apiUri);
+  const { request, clear, data, isLoading } = useMutation<TReturnAuthPOST>(apiUri);
 
   useEffect(() => {
     if (userIdCookie) {
@@ -23,10 +22,12 @@ export default function useAuth() {
       authForm.setValue('id_cookie', true);
     }
 
-    if (data) {
+    if (data && data.message) {
       if (data.user) {
         toast.success(data.message);
-        window.location.href = '/home';
+        setTimeout(() => {
+          window.location.href = '/home';
+        }, 500);
       } else {
         toast.error(data.message);
         const id_cookie = authForm.getValues('id_cookie');
@@ -45,10 +46,8 @@ export default function useAuth() {
       return;
     }
 
-    const reqForm = objectToFormData(form);
-
     clear();
-    request(reqForm, 'POST');
+    request(form, 'POST');
   }
 
   async function onInvlalid(errors: FieldErrors<IAuthSchema>) {
